@@ -1,5 +1,6 @@
 import { oaisisTranscriber, fmtN, ago } from "@/lib/products";
 import { Line1 as Line } from "@/components/Charts";
+import { C } from "@/lib/palette";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,7 @@ export default async function Oaisis() {
 
   return (
     <>
-      <div className="pagehead"><h1>OAISIS Transcriber</h1><span className="sub">project oaisis-a6968</span></div>
+      <div className="pagehead">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/logos/oaisis.png" alt="" /><h1>OAISIS</h1><span className="sub">Voice to text</span></div>
 
       <div className="kpis">
         <div className="kpi"><div className="n">{k.users}</div><div className="l">Users</div></div>
@@ -24,7 +25,7 @@ export default async function Oaisis() {
 
       <div className="grid2">
         <div><h2>Transcriptions per day</h2><div className="panel"><Line data={perDay} dataKey="value" nameKey="name" height={180} /></div></div>
-        <div><h2>Optimizations per day</h2><div className="panel"><Line data={optsPerDay} dataKey="value" nameKey="name" color="#60a5fa" height={180} /></div></div>
+        <div><h2>Optimizations per day</h2><div className="panel"><Line data={optsPerDay} dataKey="value" nameKey="name" color={C.s2} height={180} /></div></div>
       </div>
 
       <h2>Users, heaviest first</h2>

@@ -7,7 +7,7 @@ import { AutoRefresh } from "@/components/Live";
 export const dynamic = "force-dynamic";
 
 const COLORS = {
-  Home: "#3987e5", Editor: "#199e70", Paywall: "#d95926", Pong: "#c98500",
+  Home: "#C8E6CC", Editor: "#D9D6EF", Paywall: "#EDC7B9", Pong: "#8A8A8F",
   Settings: "#7a86a0", Onboarding: "#9d6ae5", "Sign in": "#7a86a0",
   Studio: "#38b6c9", "Magic Eraser": "#e05587", "Blur Lab": "#5aa0f2",
   "Custom Edit": "#2fae8f", "Create Filter": "#b7791f", "Video Look": "#8f5ae5",

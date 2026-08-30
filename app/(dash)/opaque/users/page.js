@@ -1,5 +1,6 @@
 import { getUsers, getEvents, demographics, filterByDemographic, fmtUSD } from "@/lib/data";
 import { SimpleBars } from "@/components/Charts";
+import { C } from "@/lib/palette";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export default async function Users() {
         <div>
           <h2>Age</h2>
           <div className="panel">
-            <SimpleBars data={demo.ages} dataKey="value" nameKey="name" color="#60a5fa" height={200} />
+            <SimpleBars data={demo.ages} dataKey="value" nameKey="name" color={C.s2} height={200} />
           </div>
         </div>
       </div>

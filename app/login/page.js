@@ -1,18 +1,17 @@
 "use client";
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Icon, { Mark } from "@/components/Icon";
 
 function Form() {
-  const [password, setPassword] = useState("");
   const params = useSearchParams();
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(
     params.get("e") === "config"
-      ? "This deployment has no AUTH_SECRET or DASHBOARD_PASSWORD set. Add them in Vercel → Settings → Environment Variables, then redeploy."
+      ? "This deployment has no AUTH_SECRET or DASHBOARD_PASSWORD set. Add them in Vercel, then redeploy."
       : "",
   );
   const [busy, setBusy] = useState(false);
-  const router = useRouter();
   const next = params.get("next") || "/";
 
   async function submit(e) {
@@ -25,8 +24,7 @@ function Form() {
       body: JSON.stringify({ password }),
     });
     if (res.ok) {
-      // Full navigation so middleware sees the new cookie.
-      window.location.href = next;
+      window.location.href = next; // full load, so middleware sees the cookie
       return;
     }
     setError((await res.json().catch(() => ({}))).error || "Wrong password.");
@@ -35,8 +33,11 @@ function Form() {
 
   return (
     <form className="login-card" onSubmit={submit}>
-      <div className="brand"><span className="ring" /><b>OAISIS</b><span>ANALYTICS</span></div>
-      <p className="login-sub">Everything behind one password.</p>
+      <div className="login-head">
+        <Mark size={30} />
+        <b>OAISIS Analytics</b>
+        <span>Everything behind one password</span>
+      </div>
       <input
         type="password"
         value={password}
@@ -46,15 +47,11 @@ function Form() {
         autoComplete="current-password"
       />
       {error && <p className="login-error">{error}</p>}
-      <button type="submit" disabled={busy || !password}>{busy ? "Checking…" : "Enter"}</button>
+      <button type="submit" disabled={busy || !password}>{busy ? "Checking" : "Enter"}</button>
     </form>
   );
 }
 
 export default function Login() {
-  return (
-    <div className="login-wrap">
-      <Suspense fallback={null}><Form /></Suspense>
-    </div>
-  );
+  return <div className="login-wrap"><Suspense fallback={null}><Form /></Suspense></div>;
 }

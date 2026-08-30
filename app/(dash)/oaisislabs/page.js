@@ -1,5 +1,6 @@
 import { oaisisLabs, fmtN, ago, when } from "@/lib/products";
 import { SimpleBars, Line1 as Line } from "@/components/Charts";
+import { C } from "@/lib/palette";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,7 @@ export default async function OaisisLabs() {
 
   return (
     <>
-      <div className="pagehead"><h1>OAISIS Labs</h1><span className="sub">TikTok scheduling · project oaisislabs</span></div>
+      <div className="pagehead">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/logos/oaisislabs.svg" alt="" /><h1>OAISIS Labs</h1><span className="sub">TikTok scheduling</span></div>
 
       <div className="kpis">
         <div className="kpi"><div className="n">{k.users}</div><div className="l">Accounts</div></div>
@@ -43,7 +44,7 @@ export default async function OaisisLabs() {
 
       <div className="grid2">
         <div><h2>By status</h2><div className="panel"><SimpleBars data={byStatus} dataKey="value" nameKey="name" height={Math.max(120, byStatus.length * 34)} /></div></div>
-        <div><h2>By privacy</h2><div className="panel"><SimpleBars data={byPrivacy} dataKey="value" nameKey="name" color="#60a5fa" height={Math.max(120, byPrivacy.length * 34)} /></div></div>
+        <div><h2>By privacy</h2><div className="panel"><SimpleBars data={byPrivacy} dataKey="value" nameKey="name" color={C.s2} height={Math.max(120, byPrivacy.length * 34)} /></div></div>
       </div>
 
       <h2>Recent posts</h2>

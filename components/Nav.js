@@ -1,67 +1,57 @@
 "use client";
-// The rail knows which product you're inside and shows only its views. On the
-// hub it shows the product list instead.
+// The rail follows you: the product list at the root, that product's own views
+// once you're inside one.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const SECTIONS = {
-  opaque: {
-    name: "Opaque",
-    source: "Firestore · opaque-3964b",
-    views: [
-      ["", "Overview"],
-      ["filters", "Filters"],
-      ["users", "Users"],
-      ["sessions", "Sessions"],
-      ["prompts", "Prompts"],
-    ],
-  },
-  oaisislabs: { name: "OAISIS Labs", source: "Firestore · oaisislabs", views: [["", "Overview"]] },
-  oaisis: { name: "OAISIS Transcriber", source: "Firestore · oaisis-a6968", views: [["", "Overview"]] },
-  faike: { name: "FAIKE", source: "Firestore · faike-2828d", views: [["", "Overview"]] },
-};
+import Icon from "./Icon";
+import { bySlug } from "@/lib/catalog";
 
 export default function Nav() {
   const path = usePathname() || "/";
-  const slug = path.split("/")[1];
-  const section = SECTIONS[slug];
+  const product = bySlug(path.split("/")[1]);
 
-  if (!section) {
+  if (!product) {
     return (
       <>
-        <div className="live-row"><span className="live-dot" />all products</div>
-        <nav><Link href="/" className="on">Products</Link></nav>
-        <div className="foot">One password · server-rendered<br />admin-only</div>
+        <div className="rail-state"><span className="dot on" />All products</div>
+        <nav><Link href="/" className="on"><Icon name="grid" />Products</Link></nav>
+        <div className="rail-foot">
+          <div className="rail-src">One password · server-rendered</div>
+        </div>
       </>
     );
   }
 
   return (
     <>
-      <div className="live-row"><span className="live-dot" />LIVE · auto-refresh 30s</div>
-      <p className="rail-product">{section.name}</p>
+      <div className="rail-state"><span className="dot on" />Live</div>
+      <div className="rail-product">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={product.logo} alt="" />
+        <span>{product.name}</span>
+      </div>
       <nav>
-        {section.views.map(([sub, label]) => {
-          const href = sub ? `/${slug}/${sub}` : `/${slug}`;
+        {product.views.map(([sub, label, icon]) => {
+          const href = sub ? `/${product.slug}/${sub}` : `/${product.slug}`;
           return (
             <Link key={label} href={href} className={path === href ? "on" : undefined}>
-              {label}
+              <Icon name={icon} />{label}
             </Link>
           );
         })}
       </nav>
-      <nav className="rail-back">
-        <Link href="/">← All products</Link>
+      <div className="rail-foot">
+        <Link href="/"><Icon name="back" size={15} />All products</Link>
         <button
           onClick={async () => {
             await fetch("/api/auth", { method: "DELETE" });
             window.location.href = "/login";
           }}
         >
-          Sign out
+          <Icon name="exit" size={15} />Sign out
         </button>
-      </nav>
-      <div className="foot">{section.source}<br />server-rendered · admin-only</div>
+        <div className="rail-src">Firestore · {product.source}</div>
+      </div>
     </>
   );
 }

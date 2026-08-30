@@ -1,5 +1,6 @@
 import { faike, fmtN, ago } from "@/lib/products";
 import { SimpleBars, Line1 as Line } from "@/components/Charts";
+import { C } from "@/lib/palette";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,7 @@ export default async function Faike() {
 
   return (
     <>
-      <div className="pagehead"><h1>FAIKE</h1><span className="sub">project faike-2828d</span></div>
+      <div className="pagehead">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/logos/faike.png" alt="" /><h1>FAIKE</h1><span className="sub">iOS fact checker</span></div>
 
       <div className="kpis">
         <div className="kpi"><div className="n">{k.users}</div><div className="l">Users</div></div>
@@ -27,12 +28,12 @@ export default async function Faike() {
 
       <div className="grid2">
         <div><h2>What they scan</h2><div className="panel"><SimpleBars data={scanMix} dataKey="value" nameKey="name" height={Math.max(120, scanMix.length * 34)} /></div></div>
-        <div><h2>Events</h2><div className="panel"><SimpleBars data={byEvent} dataKey="value" nameKey="name" color="#60a5fa" height={Math.max(120, byEvent.length * 30)} /></div></div>
+        <div><h2>Events</h2><div className="panel"><SimpleBars data={byEvent} dataKey="value" nameKey="name" color={C.s2} height={Math.max(120, byEvent.length * 30)} /></div></div>
       </div>
 
       <div className="grid2">
         <div><h2>Where</h2><div className="panel"><SimpleBars data={byCountry} dataKey="value" nameKey="name" height={Math.max(120, byCountry.length * 32)} /></div></div>
-        <div><h2>Device</h2><div className="panel"><SimpleBars data={byDevice} dataKey="value" nameKey="name" color="#60a5fa" height={Math.max(120, byDevice.length * 32)} /></div></div>
+        <div><h2>Device</h2><div className="panel"><SimpleBars data={byDevice} dataKey="value" nameKey="name" color={C.s2} height={Math.max(120, byDevice.length * 32)} /></div></div>
       </div>
 
       <h2>Every query typed</h2>

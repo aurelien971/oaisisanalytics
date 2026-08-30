@@ -7,19 +7,21 @@ import {
 } from "recharts";
 
 // Validated categorical slots (dark surface): blue / orange / aqua / yellow.
-export const C = { s1: "#3987e5", s2: "#d95926", s3: "#199e70", s4: "#c98500", accent: "#a3c2f0" };
+import { C } from "@/lib/palette";
 
-const axis = { stroke: "#3a4150", tick: { fill: "#8b93a5", fontSize: 11, fontFamily: "ui-monospace, Menlo, monospace" }, tickLine: false, axisLine: { stroke: "#232833" } };
-const grid = { stroke: "#1c212b", vertical: false };
+const axis = { stroke: "transparent", tick: { fill: "#4A4A4E", fontSize: 11 }, tickLine: false, axisLine: false };
+const grid = { stroke: "rgba(255,255,255,0.05)", vertical: false };
 const tip = {
-  cursor: { stroke: "#3a4150", strokeDasharray: "3 3" },
+  cursor: { stroke: "rgba(255,255,255,0.14)", strokeWidth: 1 },
   contentStyle: {
-    background: "#171b22", border: "1px solid #232833", borderRadius: 10,
-    fontSize: 12, fontFamily: "ui-monospace, Menlo, monospace", boxShadow: "0 8px 30px rgba(0,0,0,0.5)",
+    background: "rgba(14,14,15,0.94)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 14,
+    fontSize: 12, padding: "9px 12px", backdropFilter: "blur(12px)",
+    boxShadow: "0 12px 40px rgba(0,0,0,0.7)",
   },
-  labelStyle: { color: "#8b93a5", marginBottom: 4 },
+  labelStyle: { color: "#4A4A4E", marginBottom: 5, fontSize: 11 },
+  itemStyle: { color: "#F5F5F7" },
 };
-const legend = { wrapperStyle: { fontSize: 11.5, fontFamily: "ui-monospace, Menlo, monospace", color: "#8b93a5" }, iconType: "plainline", iconSize: 14 };
+const legend = { wrapperStyle: { fontSize: 11.5, color: "#8A8A8F" }, iconType: "plainline", iconSize: 14 };
 
 export function DauChart({ data }) {
   return (
@@ -30,11 +32,11 @@ export function DauChart({ data }) {
         <YAxis {...axis} allowDecimals={false} width={44} />
         <Tooltip {...tip} />
         <Legend {...legend} />
-        <Line type="monotone" dataKey="dau" name="Active users" stroke={C.s1} strokeWidth={2}
+        <Line type="monotone" dataKey="dau" name="Active users" stroke={C.s1} strokeWidth={1.4}
               dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-        <Line type="monotone" dataKey="gens" name="Generations" stroke={C.s2} strokeWidth={2}
+        <Line type="monotone" dataKey="gens" name="Generations" stroke={C.s2} strokeWidth={1.4}
               dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-        <Line type="monotone" dataKey="saves" name="Saves" stroke={C.s3} strokeWidth={2}
+        <Line type="monotone" dataKey="saves" name="Saves" stroke={C.s3} strokeWidth={1.4}
               dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
       </LineChart>
     </ResponsiveContainer>
@@ -71,7 +73,7 @@ export function HourlyChart({ data }) {
         <XAxis dataKey="hour" {...axis} interval={2} />
         <YAxis {...axis} allowDecimals={false} width={40} />
         <Tooltip {...tip} formatter={(v) => [v, "events"]} />
-        <Area type="monotone" dataKey="events" stroke={C.s1} strokeWidth={2}
+        <Area type="monotone" dataKey="events" stroke={C.s1} strokeWidth={1.4}
               fill="url(#hourFill)" activeDot={{ r: 4, strokeWidth: 0 }} />
       </AreaChart>
     </ResponsiveContainer>
@@ -121,7 +123,7 @@ export function Line1({ data, dataKey = "value", nameKey = "name", color = C.s1,
         <XAxis dataKey={nameKey} {...axis} minTickGap={26} />
         <YAxis {...axis} allowDecimals={false} width={40} />
         <Tooltip {...tip} />
-        <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2}
+        <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={1.4}
               fill={`url(#fill-${color.slice(1)})`} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
       </AreaChart>
     </ResponsiveContainer>
