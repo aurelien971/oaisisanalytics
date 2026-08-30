@@ -5,10 +5,15 @@ import { Suspense } from "react";
 
 function Form() {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const params = useSearchParams();
+  const [error, setError] = useState(
+    params.get("e") === "config"
+      ? "This deployment has no AUTH_SECRET or DASHBOARD_PASSWORD set. Add them in Vercel → Settings → Environment Variables, then redeploy."
+      : "",
+  );
   const [busy, setBusy] = useState(false);
   const router = useRouter();
-  const next = useSearchParams().get("next") || "/";
+  const next = params.get("next") || "/";
 
   async function submit(e) {
     e.preventDefault();
