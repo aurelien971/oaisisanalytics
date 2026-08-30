@@ -14,7 +14,10 @@ export default function Nav() {
     return (
       <>
         <div className="rail-state"><span className="dot on" />All products</div>
-        <nav><Link href="/" className="on"><Icon name="grid" />Products</Link></nav>
+        <nav>
+          <Link href="/" className={path === "/" ? "on" : undefined}><Icon name="grid" />Products</Link>
+          <Link href="/overview" className={path === "/overview" ? "on" : undefined}><Icon name="gauge" />Everything</Link>
+        </nav>
         <div className="rail-foot">
           <div className="rail-src">One password · server-rendered</div>
         </div>
