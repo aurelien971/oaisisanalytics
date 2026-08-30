@@ -1,8 +1,8 @@
-// The hub. One tile per product, each carrying its own icon, its own wash, and
-// the single number that says whether it's worth opening today.
+// The hub. One tile per product: what it is, where it lives publicly, and the
+// single number that says whether it's worth opening today.
 import Link from "next/link";
 import Icon from "@/components/Icon";
-import { CATALOG } from "@/lib/catalog";
+import { CATALOG, STUDIO } from "@/lib/catalog";
 import { headline } from "@/lib/headline";
 
 export const dynamic = "force-dynamic";
@@ -12,14 +12,15 @@ export default async function Hub() {
 
   return (
     <>
-      <h1>Products</h1>
-      <p className="sub" style={{ marginTop: 8 }}>Four apps, four databases, one place.</p>
+      <h1>{STUDIO.name}</h1>
+      <p className="sub" style={{ marginTop: 8, maxWidth: 560 }}>{STUDIO.about}</p>
 
       <div className="hub">
         {CATALOG.map((p) => {
           const stat = stats[p.slug];
-          const inner = (
-            <>
+          return (
+            <div key={p.slug} className={`tile ${p.wash} ${p.live ? "" : "is-off"}`}>
+              <Link href={`/${p.slug}`} className="tile-hit" aria-label={p.name} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="tile-logo" src={p.logo} alt="" />
               {stat && (
@@ -30,17 +31,20 @@ export default async function Hub() {
               )}
               <div className="tile-name">{p.name}</div>
               <div className="tile-what">{p.what}</div>
-              <p className="tile-blurb">{p.blurb}</p>
+              <div className="tile-meta">
+                <span>{p.platform}</span><i />
+                <span>{p.category}</span><i />
+                <span>{p.price}</span>
+              </div>
+              <p className="tile-blurb">{p.about}</p>
               <div className="tile-foot">
-                <span className="tile-src">{p.source}</span>
+                {/* Sits above the full-tile link so it can win the click. */}
+                <a className="tile-link" href={p.link} target="_blank" rel="noreferrer">
+                  <Icon name="link" size={13} />{p.linkLabel}
+                </a>
                 <span className="tile-go"><Icon name="arrow" size={18} /></span>
               </div>
-            </>
-          );
-          return p.live ? (
-            <Link key={p.slug} href={`/${p.slug}`} className={`tile ${p.wash}`}>{inner}</Link>
-          ) : (
-            <div key={p.slug} className={`tile ${p.wash} is-off`}>{inner}</div>
+            </div>
           );
         })}
       </div>

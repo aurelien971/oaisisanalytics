@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Icon from "@/components/Icon";
 import { overview, usd } from "@/lib/overview";
+import { CATALOG, STUDIO, bySlug } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,15 @@ export default async function Overview() {
 
   return (
     <>
-      <div className="pagehead"><h1>Everything</h1><span className="sub">All four products, side by side</span></div>
+      <div className="pagehead">
+        <h1>{STUDIO.name}</h1>
+        <a className="tile-link" href={STUDIO.link} target="_blank" rel="noreferrer">
+          <Icon name="link" size={13} />{STUDIO.linkLabel}
+        </a>
+      </div>
+      <p className="sub" style={{ marginTop: -18, marginBottom: 26, maxWidth: 620 }}>
+        {STUDIO.about} Four products, four databases — everything below is read live.
+      </p>
 
       <div className="kpis">
         <div className="kpi"><div className="n">{t.users}</div><div className="l">Users, all products</div></div>
@@ -105,22 +114,37 @@ export default async function Overview() {
         </div>
       </div>
 
-      <h2>What each one still needs</h2>
-      <div className="panel flush">
-        <table>
-          <thead><tr><th>Product</th><th>Billing signal</th></tr></thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.slug}>
-                <td>{p.name}</td>
-                <td>
-                  {p.note}
-                  {p.tokens ? ` ${p.apiCalls.toLocaleString()} API calls, ${(p.tokens / 1000).toFixed(0)}K tokens burned — priceable once a rate is set.` : ""}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <h2>The portfolio</h2>
+      <div className="folio">
+        {products.map((p) => {
+          const meta = bySlug(p.slug);
+          return (
+            <div className="folio-row" key={p.slug}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.logo} alt="" />
+              <div className="folio-body">
+                <div className="folio-head">
+                  <Link href={`/${p.slug}`} className="folio-name">{meta.name}</Link>
+                  <span className="folio-store">{meta.storeName}</span>
+                  <a className="tile-link" href={meta.link} target="_blank" rel="noreferrer">
+                    <Icon name="link" size={13} />{meta.linkLabel}
+                  </a>
+                </div>
+                <div className="tile-meta">
+                  <span>{meta.platform}</span><i />
+                  <span>{meta.category}</span><i />
+                  <span>{meta.price}</span><i />
+                  <span>{meta.source}</span>
+                </div>
+                <p className="folio-about">{meta.about}</p>
+                <p className="folio-note">
+                  <b>Billing:</b> {p.note}
+                  {p.tokens ? ` ${p.apiCalls.toLocaleString()} API calls and ${(p.tokens / 1000).toFixed(0)}K tokens so far — priceable the moment a rate is set.` : ""}
+                </p>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </>
   );

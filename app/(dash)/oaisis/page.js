@@ -1,3 +1,5 @@
+import Icon from "@/components/Icon";
+import { bySlug } from "@/lib/catalog";
 import { oaisisTranscriber, fmtN, ago } from "@/lib/products";
 import { Line1 as Line } from "@/components/Charts";
 import { C } from "@/lib/palette";
@@ -5,11 +7,12 @@ import { C } from "@/lib/palette";
 export const dynamic = "force-dynamic";
 
 export default async function Oaisis() {
+  const p = bySlug("oaisis");
   const { kpis: k, perDay, optsPerDay, perUser, recent } = await oaisisTranscriber();
 
   return (
     <>
-      <div className="pagehead">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/logos/oaisis.png" alt="" /><h1>OAISIS</h1><span className="sub">Voice to text</span></div>
+      <div className="pagehead">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={p.logo} alt="" /><h1>{p.name}</h1><span className="sub">{p.what}</span><a className="tile-link" href={p.link} target="_blank" rel="noreferrer"><Icon name="link" size={13} />{p.linkLabel}</a></div><p className="pageabout">{p.about}</p>
 
       <div className="kpis">
         <div className="kpi"><div className="n">{k.users}</div><div className="l">Users</div></div>
