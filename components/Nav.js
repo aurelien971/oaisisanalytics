@@ -16,6 +16,9 @@ const SECTIONS = {
       ["prompts", "Prompts"],
     ],
   },
+  oaisislabs: { name: "OAISIS Labs", source: "Firestore · oaisislabs", views: [["", "Overview"]] },
+  oaisis: { name: "OAISIS Transcriber", source: "Firestore · oaisis-a6968", views: [["", "Overview"]] },
+  faike: { name: "FAIKE", source: "Firestore · faike-2828d", views: [["", "Overview"]] },
 };
 
 export default function Nav() {

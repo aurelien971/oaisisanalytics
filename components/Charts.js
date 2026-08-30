@@ -105,3 +105,25 @@ export function AcquisitionChart({ data }) {
     </ResponsiveContainer>
   );
 }
+
+/** A single series over time — the shape most product pages need. */
+export function Line1({ data, dataKey = "value", nameKey = "name", color = C.s1, height = 200 }) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <AreaChart data={data} margin={{ top: 8, right: 12, left: -16, bottom: 0 }}>
+        <defs>
+          <linearGradient id={`fill-${color.slice(1)}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.28} />
+            <stop offset="100%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid {...grid} />
+        <XAxis dataKey={nameKey} {...axis} minTickGap={26} />
+        <YAxis {...axis} allowDecimals={false} width={40} />
+        <Tooltip {...tip} />
+        <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2}
+              fill={`url(#fill-${color.slice(1)})`} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}

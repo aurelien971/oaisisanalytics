@@ -210,3 +210,9 @@ a.hub-card:hover { border-color: var(--accent-deep); transform: translateY(-2px)
 .rail-back a:hover, .rail-back button:hover { color: var(--text); }
 .sub { color: var(--subtle); margin-top: 4px; }
 a.brand { text-decoration: none; color: inherit; }
+.bad-text { color: var(--bad); }
+
+/* A wide table shouldn't be able to stretch the page and clip the KPI grid. */
+.shell { min-width: 0; }
+.main { min-width: 0; }
+.panel { overflow-x: auto; }
