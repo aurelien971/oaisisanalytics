@@ -27,6 +27,12 @@ export default async function Hub() {
                 <div className="tile-stat">
                   <div className="n">{stat.value}</div>
                   <div className="l">{stat.label}</div>
+                  {/* Same second number on every tile: made or lost. A dash
+                      where the product genuinely does not record amounts. */}
+                  <div className="n" style={{ marginTop: 6, color: stat.pnl == null ? undefined : stat.pnl >= 0 ? "#4ade80" : "#f87171" }}>
+                    {stat.pnl == null ? "—" : `${stat.pnl < 0 ? "-" : ""}$${Math.abs(stat.pnl).toFixed(2)}`}
+                  </div>
+                  <div className="l">P&amp;L</div>
                 </div>
               )}
               <div className="tile-name">{p.name}</div>

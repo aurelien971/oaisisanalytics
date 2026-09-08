@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Overview() {
   const { products, totals: t } = await overview();
+  const tracked = products.filter((p) => p.tracked);
   const untracked = products.filter((p) => !p.tracked);
 
   return (
@@ -35,9 +36,10 @@ export default async function Overview() {
       <div className="caveat">
         <Icon name="shield" size={15} />
         <span>
-          Revenue and cost are recorded per user in Opaque only — {t.coveredUsers} of {t.users} users,{" "}
-          {(t.coverage * 100).toFixed(0)}% of the estate. {untracked.map((p) => p.name).join(", ")} report
-          headcount and conversions but not amounts, so the P&amp;L above is Opaque&apos;s alone.
+          {tracked.map((p) => p.name).join(" and ")} record what was actually charged —{" "}
+          {t.coveredUsers} of {t.users} users, {(t.coverage * 100).toFixed(0)}% of the estate.{" "}
+          {untracked.map((p) => p.name).join(", ")} report headcount and conversions but not amounts,
+          so the P&amp;L above covers {tracked.map((p) => p.name).join(" and ")} only.
         </span>
       </div>
 
