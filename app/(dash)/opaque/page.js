@@ -59,13 +59,13 @@ export default async function Overview() {
       )}
 
       <div className="kpis">
+        <div className="kpi good"><div className="v">{fmtUSD(t.revenueUSD)}</div><div className="l">Revenue</div></div>
+        <div className="kpi bad"><div className="v">{fmtUSD(t.spendUSD)}</div><div className="l">API cost (users)</div></div>
+        <div className={`kpi ${t.pnlUSD >= 0 ? "good" : "bad"}`}><div className="v">{fmtUSD(t.pnlUSD)}</div><div className="l">P&amp;L</div></div>
         <div className="kpi hi"><div className="v">{t.users}</div><div className="l">Users</div></div>
         <div className="kpi hi"><div className="v">{pulse.newUsers.length}</div><div className="l">New today</div></div>
         <div className="kpi"><div className="v">{pulse.events}</div><div className="l">Events today</div></div>
         <div className="kpi"><div className="v">{pulse.gens}</div><div className="l">Gens today</div></div>
-        <div className="kpi good"><div className="v">{fmtUSD(t.revenueUSD)}</div><div className="l">Revenue</div></div>
-        <div className="kpi bad"><div className="v">{fmtUSD(t.spendUSD)}</div><div className="l">API cost (users)</div></div>
-        <div className={`kpi ${t.pnlUSD >= 0 ? "good" : "bad"}`}><div className="v">{fmtUSD(t.pnlUSD)}</div><div className="l">P&amp;L</div></div>
         <div className="kpi"><div className="v">{t.generations}</div><div className="l">Generations</div></div>
         <div className="kpi"><div className="v">{t.avgGensPerUser.toFixed(1)}</div><div className="l">Gens / user</div></div>
         <div className="kpi"><div className="v">{fmtPct(t.saveRate)}</div><div className="l">Save rate</div></div>
