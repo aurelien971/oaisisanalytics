@@ -5,6 +5,14 @@ One dashboard for every product's numbers, behind one password.
 Opaque is wired up. OAISIS Labs and FAIKE have their places on the hub and are
 waiting on credentials.
 
+Surrender writes `users`, `events` and `sessions` into `surrender-e927a` from
+the app itself, in the same shape FAIKE uses. It is the one product with no API
+cost — the seven-day plan is generated on device — so its P&L is revenue minus
+ad spend and nothing else. Ad spend is not something an app can know: write one
+row per day per channel into a `spend` collection with an `amount_usd` field,
+and CAC and ROAS light up. Until then they render as em-dashes rather than
+guesses.
+
 ## Run it
 
 ```bash
@@ -23,6 +31,7 @@ renders.
 | `DASHBOARD_PASSWORD` | The one password. Change it here, restart, done. |
 | `AUTH_SECRET` | Signs the session cookie. `openssl rand -hex 32`. Rotating it signs everyone out. |
 | `OPAQUE_SERVICE_ACCOUNT_B64` | Base64 of the `opaque-3964b` service account JSON. |
+| `SURRENDER_SERVICE_ACCOUNT_B64` | Base64 of the `surrender-e927a` service account JSON. |
 
 Locally you can skip the base64 and drop the key in as `serviceAccount.json`
 instead — it's gitignored, and `lib/firebase.js` falls back to it. A deploy has
