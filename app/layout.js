@@ -10,7 +10,8 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-export const metadata = { title: "OAISIS Analytics", description: "Every product's numbers, one password." };
+export const metadata = {
+  icons: { icon: "/icon.png", apple: "/apple-icon.png" }, title: "OAISIS Analytics", description: "Every product's numbers, one password." };
 
 export default function RootLayout({ children }) {
   return (
