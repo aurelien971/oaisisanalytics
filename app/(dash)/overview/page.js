@@ -128,6 +128,8 @@ export default async function Overview() {
           const meta = bySlug(p.slug);
           return (
             <div className="folio-row" key={p.slug}>
+              {/* The whole row opens the product; the external link sits above it. */}
+              <Link className="folio-hit" href={`/${p.slug}`} aria-label={meta.name} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.logo} alt="" />
               <div className="folio-body">

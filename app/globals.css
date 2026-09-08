@@ -340,3 +340,11 @@ tr.total td { border-top: 1px solid var(--hair); border-bottom: 0; color: var(--
 .folio-note b { color: var(--dim); font-weight: 500; }
 .pagehead .tile-link { margin-left: 2px; }
 .pageabout { margin: -20px 0 30px; max-width: 660px; font-size: 13px; line-height: 1.62; color: var(--dim); }
+
+/* ── Whole portfolio row opens the product ──────────────────────────────── */
+.folio-row { position: relative; }
+.folio-hit { position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+.folio-row > *:not(.folio-hit) { position: relative; z-index: 2; }
+.folio-row:hover .folio-name { text-decoration: underline; }
+/* Links inside must still beat the overlay. */
+.folio-row a.tile-link, .folio-row a.folio-name { position: relative; z-index: 3; }
