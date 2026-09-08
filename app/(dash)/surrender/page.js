@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Surrender() {
   const p = bySlug("surrender");
-  const { funnel, worst, answers, confession, paywall, money, retention, att, installsDaily } =
+  const { funnel, worst, answers, confession, paywall, money, retention, installsDaily } =
     await surrender();
 
   return (
@@ -88,10 +88,8 @@ export default async function Surrender() {
         <div><h3>Which hard night</h3><div className="panel"><SimpleBars data={answers.hardNight} dataKey="value" nameKey="name" color={C.s2} height={Math.max(120, answers.hardNight.length * 30)} /></div></div>
       </div>
 
-      <div className="grid2">
-        <div><h2>Where</h2><div className="panel"><SimpleBars data={answers.country} dataKey="value" nameKey="name" height={Math.max(120, answers.country.length * 30)} /></div></div>
-        <div><h2>Tracking permission</h2><div className="panel"><SimpleBars data={att} dataKey="value" nameKey="name" color={C.s2} height={140} /></div></div>
-      </div>
+      <h2>Where</h2>
+      <div className="panel"><SimpleBars data={answers.country} dataKey="value" nameKey="name" height={Math.max(120, answers.country.length * 30)} /></div>
 
       <p className="sub" style={{ marginTop: 24 }}>
         API cost is genuinely zero — the seven-day plan is generated on device from a fixed library,
