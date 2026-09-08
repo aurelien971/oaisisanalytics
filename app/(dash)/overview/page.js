@@ -2,11 +2,12 @@ import Link from "next/link";
 import Icon from "@/components/Icon";
 import { overview, usd } from "@/lib/overview";
 import { CATALOG, STUDIO, bySlug } from "@/lib/catalog";
+import { AcquisitionByProduct } from "@/components/Charts";
 
 export const dynamic = "force-dynamic";
 
 export default async function Overview() {
-  const { products, totals: t } = await overview();
+  const { products, totals: t, acquisition } = await overview();
   const tracked = products.filter((p) => p.tracked);
   const untracked = products.filter((p) => !p.tracked);
 
@@ -41,6 +42,11 @@ export default async function Overview() {
           {untracked.map((p) => p.name).join(", ")} report headcount and conversions but not amounts,
           so the P&amp;L above covers {tracked.map((p) => p.name).join(" and ")} only.
         </span>
+      </div>
+
+      <h2>New users per day</h2>
+      <div className="panel">
+        <AcquisitionByProduct data={acquisition} products={products} />
       </div>
 
       <h2>By product</h2>

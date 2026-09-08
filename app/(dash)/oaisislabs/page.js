@@ -1,14 +1,14 @@
 import Icon from "@/components/Icon";
 import { bySlug } from "@/lib/catalog";
 import { oaisisLabs, fmtN, ago, when } from "@/lib/products";
-import { SimpleBars, Line1 as Line } from "@/components/Charts";
+import { SimpleBars, Line1 as Line, AcquisitionChart } from "@/components/Charts";
 import { C } from "@/lib/palette";
 
 export const dynamic = "force-dynamic";
 
 export default async function OaisisLabs() {
   const p = bySlug("oaisislabs");
-  const { kpis: k, byStatus, byPrivacy, perDay, failures, posts } = await oaisisLabs();
+  const { kpis: k, byStatus, byPrivacy, perDay, failures, posts , acquisition, new7d } = await oaisisLabs();
   const recent = [...posts].sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0)).slice(0, 15);
 
   return (
@@ -41,6 +41,12 @@ export default async function OaisisLabs() {
           </div>
         </>
       )}
+
+      <h2>New users per day</h2>
+      <div className="panel">
+        <AcquisitionChart data={acquisition} />
+        <div className="mono muted" style={{ marginTop: 8 }}>{new7d} in the last 7 days</div>
+      </div>
 
       <h2>Posts created per day</h2>
       <div className="panel"><Line data={perDay} dataKey="value" nameKey="name" height={180} /></div>

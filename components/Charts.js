@@ -129,3 +129,29 @@ export function Line1({ data, dataKey = "value", nameKey = "name", color = C.s1,
     </ResponsiveContainer>
   );
 }
+
+/** Signups per day, one stacked bar segment per product. */
+export function AcquisitionByProduct({ data, products }) {
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <BarChart data={data} margin={{ top: 8, right: 12, left: -12, bottom: 0 }} barCategoryGap="18%">
+        <CartesianGrid {...grid} />
+        <XAxis dataKey="day" {...axis} tickFormatter={(d) => String(d).slice(5)} minTickGap={26} />
+        <YAxis {...axis} allowDecimals={false} width={40} />
+        <Tooltip {...tip} />
+        <Legend wrapperStyle={{ fontSize: 12 }} />
+        {products.map((p, i) => (
+          <Bar
+            key={p.slug}
+            dataKey={p.slug}
+            name={p.name}
+            stackId="signups"
+            fill={[C.s1, C.s2, C.s3, C.s4][i % 4]}
+            radius={i === products.length - 1 ? [4, 4, 0, 0] : 0}
+            maxBarSize={26}
+          />
+        ))}
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}

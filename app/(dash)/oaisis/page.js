@@ -1,14 +1,14 @@
 import Icon from "@/components/Icon";
 import { bySlug } from "@/lib/catalog";
 import { oaisisTranscriber, fmtN, ago } from "@/lib/products";
-import { Line1 as Line } from "@/components/Charts";
+import { Line1 as Line, AcquisitionChart } from "@/components/Charts";
 import { C } from "@/lib/palette";
 
 export const dynamic = "force-dynamic";
 
 export default async function Oaisis() {
   const p = bySlug("oaisis");
-  const { kpis: k, perDay, optsPerDay, perUser, recent } = await oaisisTranscriber();
+  const { kpis: k, perDay, optsPerDay, perUser, recent , acquisition, new7d } = await oaisisTranscriber();
 
   return (
     <>
@@ -24,6 +24,12 @@ export default async function Oaisis() {
         <div className="kpi"><div className="n">{fmtN(k.words)}</div><div className="l">Words</div></div>
         <div className="kpi"><div className="n">{k.avgClipS.toFixed(1)}s</div><div className="l">Avg clip</div></div>
         <div className="kpi"><div className="n">{fmtN(k.optimizations)}</div><div className="l">Optimizations</div></div>
+      </div>
+
+      <h2>New users per day</h2>
+      <div className="panel">
+        <AcquisitionChart data={acquisition} />
+        <div className="mono muted" style={{ marginTop: 8 }}>{new7d} in the last 7 days</div>
       </div>
 
       <div className="grid2">

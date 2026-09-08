@@ -2,14 +2,14 @@ import Icon from "@/components/Icon";
 import { bySlug } from "@/lib/catalog";
 import { faike, fmtN, ago } from "@/lib/products";
 import { usd } from "@/lib/money";
-import { SimpleBars, Line1 as Line } from "@/components/Charts";
+import { SimpleBars, Line1 as Line, AcquisitionChart } from "@/components/Charts";
 import { C } from "@/lib/palette";
 
 export const dynamic = "force-dynamic";
 
 export default async function Faike() {
   const p = bySlug("faike");
-  const { kpis: k, scanMix, byEvent, byCountry, byDevice, perDay, perUser, queries, money } = await faike();
+  const { kpis: k, scanMix, byEvent, byCountry, byDevice, perDay, perUser, queries, money , acquisition, new7d } = await faike();
 
   return (
     <>
@@ -28,6 +28,12 @@ export default async function Faike() {
         <div className={k.converted ? "kpi good" : "kpi bad"}><div className="n">{k.converted}</div><div className="l">Converted</div></div>
         <div className="kpi"><div className="n">{(k.convRate * 100).toFixed(0)}%</div><div className="l">Paywall conversion</div></div>
         <div className="kpi"><div className="n">{k.ranOut}</div><div className="l">Ran out of scans</div></div>
+      </div>
+
+      <h2>New users per day</h2>
+      <div className="panel">
+        <AcquisitionChart data={acquisition} />
+        <div className="mono muted" style={{ marginTop: 8 }}>{new7d} in the last 7 days</div>
       </div>
 
       <h2>Sessions per day</h2>
