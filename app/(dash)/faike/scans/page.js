@@ -1,127 +1,148 @@
-// Every scan: when, who, which of the three checks, what went in, what came back.
+// Every scan, newest first. Click one for the whole result screen.
 import Link from "next/link";
-import { faike } from "@/lib/products";
+import { faike, faikeScanHistory } from "@/lib/products";
+import { signedUrl } from "@/lib/firebase";
+import { AutoRefresh } from "@/components/Live";
 import { SimpleBars } from "@/components/Charts";
 import { C } from "@/lib/palette";
 
 export const dynamic = "force-dynamic";
 
-const stamp = (ms) => {
-  if (!ms) return "—";
-  const d = new Date(ms);
-  return d.toLocaleString(undefined, {
-    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
-  });
-};
+const stamp = (ms) =>
+  !ms ? "—" : new Date(ms).toLocaleString(undefined, {
+    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
-const MODE_TONE = { fact_check: C.s1, image: C.s2, text: C.s3 };
-
-function Input({ input, mode }) {
-  if (!input) return <span className="muted">—</span>;
-  const bits = [];
-  if (input.hasImage) bits.push("image");
-  if (input.usedVoice) bits.push("voice");
-  if (input.chars != null && input.chars > 0) bits.push(`${input.chars} chars`);
-  if (!bits.length) bits.push(mode === "image" ? "image" : "typed");
-  return <span className="mono muted">{bits.join(" · ")}</span>;
-}
+const MODE_TONE = { fact_check: C.s1, image: C.s2, text: C.s3, link: C.s4 };
 
 export default async function FaikeScans() {
-  const { scanFeed, scanMix, kpis: k } = await faike();
+  const [{ scans, ready }, { scanFeed, kpis: k }] = await Promise.all([
+    faikeScanHistory({ limit: 120 }),
+    faike(),
+  ]);
+
+  // Sign the thumbnails we can (local signing, no network round-trip).
+  const withImages = await Promise.all(
+    scans.map(async (s) => ({ ...s, imageUrl: s.imagePath ? await signedUrl("faike", s.imagePath, 60) : null }))
+  );
+
+  const backfilled = withImages.filter((s) => s.backfilled).length;
+  const live = withImages.length - backfilled;
+  const withPhoto = withImages.filter((s) => s.imageUrl).length;
 
   const verdicts = Object.entries(
-    scanFeed.reduce((a, s) => { const v = s.failed ? "failed" : s.verdict; a[v] = (a[v] || 0) + 1; return a; }, {})
+    withImages.reduce((a, s) => { a[s.verdict] = (a[s.verdict] || 0) + 1; return a; }, {})
   ).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-
-  const byMode = Object.entries(
-    scanFeed.reduce((a, s) => { a[s.modeLabel] = (a[s.modeLabel] || 0) + 1; return a; }, {})
-  ).map(([name, value]) => ({ name, value }));
-
-  const failures = scanFeed.filter((s) => s.failed);
-  const withText = scanFeed.filter((s) => s.text).length;
 
   return (
     <>
+      <AutoRefresh seconds={15} />
       <div className="pagehead">
         <h1>Scans</h1>
-        <span className="sub mono">{scanFeed.length} most recent, newest first</span>
+        <span className="sub mono">
+          {withImages.length} full records · refreshing every 15s
+        </span>
       </div>
 
       <div className="kpis">
         <div className="kpi"><div className="n">{k.scans}</div><div className="l">Scans, lifetime</div></div>
-        <div className="kpi"><div className="n">{k.scansPerUser.toFixed(1)}</div><div className="l">Per user</div></div>
-        <div className={failures.length ? "kpi bad" : "kpi"}><div className="n">{failures.length}</div><div className="l">Failed</div></div>
-        <div className="kpi"><div className="n">{withText}</div><div className="l">With the text recovered</div></div>
+        <div className="kpi"><div className="n">{withImages.length}</div><div className="l">Full records</div></div>
+        <div className="kpi"><div className="n">{backfilled}</div><div className="l">Backfilled</div></div>
+        <div className="kpi"><div className="n">{live}</div><div className="l">Live</div></div>
+        <div className="kpi"><div className="n">{withPhoto}</div><div className="l">With the image</div></div>
       </div>
 
-      {/* The app records that an image was attached, but never uploads it. */}
-      <div className="panel" style={{ marginBottom: 18 }}>
-        <div className="mono muted" style={{ lineHeight: 1.6 }}>
-          <b>The uploaded images are not stored anywhere.</b> The app logs{" "}
-          <code>has_image: true</code> and the character count, but the picture itself
-          never leaves the phone — there is no Storage bucket on <code>faike-2828d</code>,
-          and no event field holds a URL. Typed text is recoverable because it is kept on
-          the user document, so it is shown below where it can be matched.
-          To see the actual images here, the app must upload each scan to Firebase Storage
-          and log the path on <code>scan_started</code>.
-        </div>
-      </div>
-
-      <div className="grid2">
-        <div>
-          <h2>Which check they ran</h2>
-          <div className="panel">
-            <SimpleBars data={byMode} dataKey="value" nameKey="name" height={Math.max(140, byMode.length * 34)} />
+      {withImages.length === 0 && (
+        <div className="panel" style={{ marginBottom: 18 }}>
+          <div className="mono muted" style={{ lineHeight: 1.7 }}>
+            <b>No full records yet.</b> They appear here the moment the app writes
+            to <code>scan_history</code> — the backfill starts about four seconds
+            after launch and uploads one item every 0.4s.
+            <br /><br />
+            If nothing arrives: the Firestore rules must allow{" "}
+            <code>create, update</code> on <code>scan_history</code>, and the
+            Storage rules must allow writes to <code>scans/&#123;uid&#125;/</code>.
+            Without those the app fails silently.
+            <br /><br />
+            The older event-derived feed is still below, so the page is never blank.
           </div>
         </div>
-        <div>
-          <h2>Verdicts returned</h2>
-          <div className="panel">
-            <SimpleBars data={verdicts} dataKey="value" nameKey="name" color={C.s2} height={Math.max(140, verdicts.length * 30)} />
-          </div>
-        </div>
-      </div>
+      )}
 
-      <h2>Every scan</h2>
-      <div className="panel flush">
-        {scanFeed.length === 0 ? (
-          <div className="empty">No scans logged yet.</div>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>When</th><th>User</th><th>Check</th><th>What went in</th>
-                <th>What they checked</th><th>Verdict</th>
-                <th className="num">Score</th><th className="num">Sources</th><th className="num">Took</th>
-              </tr>
-            </thead>
-            <tbody>
-              {scanFeed.map((r, i) => (
-                <tr key={i}>
-                  <td className="mono muted" style={{ whiteSpace: "nowrap" }}>{stamp(r.at)}</td>
-                  <td className="mono">
-                    <Link href={`/faike/users/${r.uid}`}>{String(r.uid || "?").slice(0, 8)}</Link>
-                  </td>
-                  <td>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: 2, background: MODE_TONE[r.mode] || "#556077" }} />
-                      {r.modeLabel}
-                    </span>
-                  </td>
-                  <td><Input input={r.input} mode={r.mode} /></td>
-                  <td style={{ maxWidth: 320 }}>
-                    {r.text ? <span title={r.text}>{r.text.length > 90 ? r.text.slice(0, 90) + "…" : r.text}</span>
-                            : <span className="muted">{r.mode === "image" ? "image, not stored" : "—"}</span>}
-                  </td>
-                  <td className={r.failed ? "bad" : ""}>{r.failed ? `failed — ${r.reason || "unknown"}` : r.verdict}</td>
-                  <td className="num mono">{r.score == null ? "—" : `${r.score}%`}</td>
-                  <td className="num mono muted">{r.sources ?? "—"}</td>
-                  <td className="num mono muted">{r.durationMs == null ? "—" : `${(r.durationMs / 1000).toFixed(1)}s`}</td>
+      {verdicts.length > 0 && (
+        <>
+          <h2>Verdicts</h2>
+          <div className="panel">
+            <SimpleBars data={verdicts} dataKey="value" nameKey="name" color={C.s2}
+                        height={Math.max(140, verdicts.length * 30)} />
+          </div>
+        </>
+      )}
+
+      {withImages.length > 0 && (
+        <>
+          <h2>Every scan</h2>
+          <div className="panel flush">
+            <table>
+              <thead>
+                <tr>
+                  <th></th><th>When</th><th>User</th><th>Check</th><th>What they checked</th>
+                  <th>Verdict</th><th className="num">Score</th><th className="num">Sources</th><th className="num">Follow-ups</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {withImages.map((s) => (
+                  <tr key={s.id}>
+                    <td style={{ width: 52 }}>
+                      {s.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={s.imageUrl} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 6, display: "block" }} />
+                      ) : (
+                        <span className="muted mono" style={{ fontSize: 11 }}>{s.hadImage ? "—" : ""}</span>
+                      )}
+                    </td>
+                    <td className="mono muted" style={{ whiteSpace: "nowrap" }}>
+                      <Link href={`/faike/scans/${encodeURIComponent(s.id)}`}>{stamp(s.at)}</Link>
+                    </td>
+                    <td className="mono"><Link href={`/faike/users/${s.uid}`}>{String(s.uid).slice(0, 8)}</Link></td>
+                    <td>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: 2, background: MODE_TONE[s.mode] || "#556077" }} />
+                        {s.modeLabel}
+                      </span>
+                      {s.backfilled && <span className="pill" style={{ marginLeft: 8 }}>backfilled</span>}
+                    </td>
+                    <td style={{ maxWidth: 320 }}>
+                      {s.preview ? (s.preview.length > 80 ? s.preview.slice(0, 80) + "…" : s.preview)
+                                 : <span className="muted">—</span>}
+                    </td>
+                    <td>{s.verdict}</td>
+                    <td className="num mono">{s.score == null ? "—" : `${s.score}%`}</td>
+                    <td className="num mono muted">{s.sourcesCount}</td>
+                    <td className="num mono muted">{s.followUps.length || ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      <h2>From the event log</h2>
+      <div className="panel flush">
+        <table>
+          <thead><tr><th>When</th><th>User</th><th>Check</th><th>Verdict</th><th className="num">Score</th></tr></thead>
+          <tbody>
+            {scanFeed.slice(0, 20).map((r, i) => (
+              <tr key={i}>
+                <td className="mono muted" style={{ whiteSpace: "nowrap" }}>{stamp(r.at)}</td>
+                <td className="mono"><Link href={`/faike/users/${r.uid}`}>{String(r.uid).slice(0, 8)}</Link></td>
+                <td className="mono">{r.modeLabel}</td>
+                <td className={r.failed ? "bad" : ""}>{r.verdict}</td>
+                <td className="num mono">{r.score == null ? "—" : `${r.score}%`}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </>
   );
