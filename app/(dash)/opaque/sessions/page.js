@@ -1,3 +1,4 @@
+import Link from "next/link";
 // Sessions: every user visit as a trajectory — which screens, in order, and
 // how long on each. Data comes from sessions/{id} written by the app's
 // ScreenLog (app version with screen tracking and newer).
@@ -43,7 +44,8 @@ export default async function Sessions() {
         return (
           <div className="panel" key={s.id} style={{ marginBottom: 14 }}>
             <div style={{ display: "flex", gap: 14, alignItems: "baseline", flexWrap: "wrap" }}>
-              <b>{nameOf.get(s.uid) || s.uid.slice(0, 6)}</b>
+              <b><Link href={`/opaque/users/${s.uid}`}>{nameOf.get(s.uid) || s.uid.slice(0, 6)}</Link></b>
+              <Link className="mono" href={`/opaque/sessions/${s.id}`}>open →</Link>
               <span className="mono muted">
                 {s.day} {s.startMs ? fmtTime(s.startMs) : ""} · {mmss(s.duration)} ·{" "}
                 {s.screens.length} screen{s.screens.length === 1 ? "" : "s"} · {s.device} · iOS {s.ios} · v{s.appVersion}

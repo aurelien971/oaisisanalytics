@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getUsers, getEvents, demographics, filterByDemographic, fmtUSD } from "@/lib/data";
 import { SimpleBars } from "@/components/Charts";
 import { C } from "@/lib/palette";
@@ -62,7 +63,7 @@ export default async function Users() {
               const pnl = (u.revenueUSD || 0) - (u.spendUSD || 0);
               return (
                 <tr key={u.uid}>
-                  <td className="mono">{(u.name || u.uid).slice(0, 16)}</td>
+                  <td className="mono"><Link href={`/opaque/users/${u.uid}`}>{(u.name || u.uid).slice(0, 16)}</Link></td>
                   <td className="muted">{[u.gender, u.age].filter(Boolean).join(" · ") || "—"}</td>
                   <td className="num">{u.sessions || 0}</td>
                   <td className="num">{u.generations || 0}</td>

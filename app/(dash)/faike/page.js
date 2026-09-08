@@ -1,6 +1,7 @@
 import Icon from "@/components/Icon";
 import { bySlug } from "@/lib/catalog";
 import { faike, fmtN, ago } from "@/lib/products";
+import { usd } from "@/lib/money";
 import { SimpleBars, Line1 as Line } from "@/components/Charts";
 import { C } from "@/lib/palette";
 
@@ -8,13 +9,16 @@ export const dynamic = "force-dynamic";
 
 export default async function Faike() {
   const p = bySlug("faike");
-  const { kpis: k, scanMix, byEvent, byCountry, byDevice, perDay, perUser, queries } = await faike();
+  const { kpis: k, scanMix, byEvent, byCountry, byDevice, perDay, perUser, queries, money, scanFeed, purchases } = await faike();
 
   return (
     <>
       <div className="pagehead">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={p.logo} alt="" /><h1>{p.name}</h1><span className="sub">{p.what}</span><a className="tile-link" href={p.link} target="_blank" rel="noreferrer"><Icon name="link" size={13} />{p.linkLabel}</a></div><p className="pageabout">{p.about}</p>
 
       <div className="kpis">
+        <div className="kpi"><div className="n">{usd(money.revenue)}</div><div className="l">Revenue</div></div>
+        <div className="kpi"><div className="n" style={{ color: "#f87171" }}>{usd(money.cost)}</div><div className="l">API cost</div></div>
+        <div className={money.pnl >= 0 ? "kpi good" : "kpi bad"}><div className="n">{usd(money.pnl)}</div><div className="l">P&amp;L</div></div>
         <div className="kpi"><div className="n">{k.users}</div><div className="l">Users</div></div>
         <div className="kpi"><div className="n">{k.sessions}</div><div className="l">Sessions</div></div>
         <div className="kpi"><div className="n">{fmtN(k.scans)}</div><div className="l">Scans</div></div>
@@ -24,6 +28,54 @@ export default async function Faike() {
         <div className={k.converted ? "kpi good" : "kpi bad"}><div className="n">{k.converted}</div><div className="l">Converted</div></div>
         <div className="kpi"><div className="n">{(k.convRate * 100).toFixed(0)}%</div><div className="l">Paywall conversion</div></div>
         <div className="kpi"><div className="n">{k.ranOut}</div><div className="l">Ran out of scans</div></div>
+      </div>
+
+      <h2>Latest scans</h2>
+      <div className="panel flush">
+        {scanFeed.length === 0 ? (
+          <div className="mono muted" style={{ padding: 16 }}>No scans logged yet.</div>
+        ) : (
+          <table>
+            <thead>
+              <tr><th>When</th><th>User</th><th>Kind</th><th>Verdict</th><th>Score</th><th>Sources</th><th>Took</th></tr>
+            </thead>
+            <tbody>
+              {scanFeed.map((r, i) => (
+                <tr key={i}>
+                  <td className="mono muted">{ago(r.at)}</td>
+                  <td className="mono">{String(r.uid || "?").slice(0, 8)}</td>
+                  <td className="mono">{r.mode}</td>
+                  <td className={r.failed ? "bad" : ""}>{r.failed ? `failed — ${r.reason || "unknown"}` : r.verdict}</td>
+                  <td className="mono">{r.score == null ? "—" : `${r.score}%`}</td>
+                  <td className="mono muted">{r.sources ?? "—"}</td>
+                  <td className="mono muted">{r.durationMs == null ? "—" : `${(r.durationMs / 1000).toFixed(1)}s`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <h2>Purchases</h2>
+      <div className="panel flush">
+        {purchases.length === 0 ? (
+          <div className="mono muted" style={{ padding: 16 }}>No purchases yet.</div>
+        ) : (
+          <table>
+            <thead><tr><th>When</th><th>User</th><th>Plan</th><th>Charged</th><th>In USD</th></tr></thead>
+            <tbody>
+              {purchases.map((r, i) => (
+                <tr key={i}>
+                  <td className="mono muted">{ago(r.at)}</td>
+                  <td className="mono">{String(r.uid || "?").slice(0, 8)}</td>
+                  <td className="mono">{r.plan}{r.estimated ? " · inferred" : ""}</td>
+                  <td className="mono">{r.currency === "USD" && r.estimated ? "—" : `${r.native} ${r.currency}`}</td>
+                  <td className="mono good">{usd(r.amountUSD)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <h2>Sessions per day</h2>

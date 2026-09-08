@@ -1,4 +1,5 @@
-import { getFilterStats, filterInsights, fmtPct } from "@/lib/data";
+import Link from "next/link";
+import { getFilterStats, filterInsights, fmtPct, getEvents, getUsers, filterFeed, fmtTime } from "@/lib/data";
 import { SimpleBars } from "@/components/Charts";
 
 export const dynamic = "force-dynamic";
@@ -38,11 +39,38 @@ function FilterTable({ rows, showRates = true }) {
 }
 
 export default async function Filters() {
+  const [feedEvents, feedUsers] = await Promise.all([getEvents(), getUsers()]);
+  const feed = filterFeed(feedEvents);
+  const feedNames = new Map(feedUsers.map((u) => [u.uid, u.name || u.uid.slice(0, 6)]));
   const stats = await getFilterStats();
   const { popular, eyeCatchers, keepers } = filterInsights(stats);
 
   return (
     <>
+
+      <h2>Latest filter taps</h2>
+      <div className="panel flush">
+        {feed.length === 0 ? (
+          <div className="empty">No taps recorded yet.</div>
+        ) : (
+          <table>
+            <thead><tr><th>When</th><th>User</th><th>Filter</th><th>Kind</th><th>Applied?</th></tr></thead>
+            <tbody>
+              {feed.map((f, i) => (
+                <tr key={i}>
+                  <td className="mono muted">{f.day} {f.at ? fmtTime(f.at) : ""}</td>
+                  <td className="mono">
+                    <Link href={`/opaque/users/${f.uid}`}>{feedNames.get(f.uid) || String(f.uid).slice(0, 6)}</Link>
+                  </td>
+                  <td>{f.name}</td>
+                  <td className="mono muted">{f.kind}</td>
+                  <td className="mono muted">{f.applied ? "applied" : "tapped"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
       <h1>Filters</h1>
 
       <h2>Most applied</h2>
