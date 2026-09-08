@@ -22,12 +22,12 @@ export default async function Surrender() {
         <div className="kpi"><div className="n" style={{ color: "#f87171" }}>{usd(money.spend)}</div><div className="l">Ad spend</div></div>
         <div className="kpi"><div className="n">{usd(money.apiCost)}</div><div className="l">API cost</div></div>
         <div className={money.profit >= 0 ? "kpi good" : "kpi bad"}><div className="n">{usd(money.profit)}</div><div className="l">P&amp;L</div></div>
-        <div className="kpi"><div className="n">{fmtN(money.installs)}</div><div className="l">Installs</div></div>
-        <div className="kpi"><div className="n">{usd(money.rpd)}</div><div className="l">RPD</div></div>
+        <div className="kpi"><div className="n">{fmtN(money.installs)}</div><div className="l">Users</div></div>
+        <div className="kpi"><div className="n">{usd(money.rpd)}</div><div className="l">Revenue / user</div></div>
         <div className="kpi"><div className="n">{money.cac === null ? "—" : usd(money.cac)}</div><div className="l">CAC</div></div>
         <div className="kpi"><div className="n">{money.roas === null ? "—" : `${money.roas.toFixed(2)}x`}</div><div className="l">ROAS</div></div>
         <div className={money.conversions ? "kpi good" : "kpi bad"}><div className="n">{money.conversions}</div><div className="l">Conversions</div></div>
-        <div className="kpi"><div className="n">{money.conversionRate}%</div><div className="l">Install → paid</div></div>
+        <div className="kpi"><div className="n">{money.conversionRate}%</div><div className="l">User → paid</div></div>
         <div className="kpi"><div className="n">{confession.rate}%</div><div className="l">Wrote a confession</div></div>
         <div className="kpi"><div className="n">{retention.checkIns}</div><div className="l">Check-ins</div></div>
       </div>
