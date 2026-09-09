@@ -9,6 +9,12 @@ export const dynamic = "force-dynamic";
 export default async function Overview() {
   const { products, totals: t, acquisition } = await overview();
   const tracked = products.filter((p) => p.tracked);
+  // "A, B and C" rather than "A and B and C and D".
+  const listNames = (list) => {
+    const names = list.map((p) => p.name);
+    if (names.length <= 1) return names[0] ?? "";
+    return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  };
   const untracked = products.filter((p) => !p.tracked);
 
   return (
@@ -20,7 +26,7 @@ export default async function Overview() {
         </a>
       </div>
       <p className="sub" style={{ marginTop: -18, marginBottom: 26, maxWidth: 620 }}>
-        {STUDIO.about} Four products, four databases — everything below is read live.
+        {STUDIO.about} {products.length} products, {products.length} databases — everything below is read live.
       </p>
 
       <div className="kpis">
@@ -37,10 +43,10 @@ export default async function Overview() {
       <div className="caveat">
         <Icon name="shield" size={15} />
         <span>
-          {tracked.map((p) => p.name).join(" and ")} record what was actually charged —{" "}
+          {listNames(tracked)} record what was actually charged —{" "}
           {t.coveredUsers} of {t.users} users, {(t.coverage * 100).toFixed(0)}% of the estate.{" "}
-          {untracked.map((p) => p.name).join(", ")} report headcount and conversions but not amounts,
-          so the P&amp;L above covers {tracked.map((p) => p.name).join(" and ")} only.
+          {listNames(untracked)} report headcount and conversions but not amounts,
+          so the P&amp;L above covers {listNames(tracked)} only.
         </span>
       </div>
 
