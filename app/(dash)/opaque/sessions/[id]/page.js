@@ -1,28 +1,50 @@
-// One session, screen by screen: what they opened, in what order, for how long.
+// One session as the path it actually was, with whatever was generated along it.
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getSession, getUser, fmtTime } from "@/lib/data";
+import { getSession, getUser, getEvents, generationsFrom, generationsInSession, fmtTime, fmtUSD } from "@/lib/data";
+import { signedUrl } from "@/lib/firebase";
+import { Flow, screensToSteps, mmss } from "@/components/Flow";
 
 export const dynamic = "force-dynamic";
-
-const COLORS = {
-  Home: "#C8E6CC", Editor: "#D9D6EF", Paywall: "#EDC7B9", Pong: "#8A8A8F",
-  Settings: "#7a86a0", Onboarding: "#9d6ae5", "Sign in": "#7a86a0",
-  Studio: "#38b6c9", "Magic Eraser": "#e05587", "Blur Lab": "#5aa0f2",
-  "Custom Edit": "#2fae8f", "Create Filter": "#b7791f", "Video Look": "#8f5ae5",
-};
-const color = (s) => COLORS[s] || "#556077";
-
-const mmss = (sec) => {
-  const m = Math.floor(sec / 60), s = Math.round(sec % 60);
-  return m ? `${m}m ${String(s).padStart(2, "0")}s` : `${s}s`;
-};
 
 export default async function OpaqueSession({ params }) {
   const session = await getSession(params.id);
   if (!session) notFound();
-  const user = await getUser(session.uid).catch(() => null);
-  const total = Math.max(session.screens.reduce((a, x) => a + (x.d || 0), 0), 1);
+
+  const [user, events] = await Promise.all([
+    getUser(session.uid).catch(() => null),
+    getEvents().catch(() => []),
+  ]);
+
+  const gens = generationsInSession(session, generationsFrom(events, 4000));
+  const withUrls = await Promise.all(
+    gens.map(async (g) => ({
+      ...g,
+      beforeUrl: g.beforePath ? await signedUrl("opaque", g.beforePath, 60) : null,
+      afterUrl: g.afterPath ? await signedUrl("opaque", g.afterPath, 60) : null,
+    }))
+  );
+
+  // Generations sit in the path where they happened, between the screens.
+  const steps = [];
+  const screens = session.screens || [];
+  screens.forEach((x, i) => {
+    steps.push({ label: x.s, sub: mmss(x.d) });
+    const elapsedEnd = (x.at ?? 0) + (x.d ?? 0);
+    withUrls.forEach((g) => {
+      const offset = (g.at - (session.startMs ?? 0)) / 1000;
+      if (offset >= (x.at ?? 0) && offset < elapsedEnd + 1 && !g._placed) {
+        g._placed = true;
+        steps.push({
+          label: g.failed ? "Generation failed" : "Generated",
+          sub: g.filterId || g.kind,
+          tone: g.failed ? "#e05587" : "#2fae8f",
+          badge: g.failed ? null : fmtUSD(g.costUSD),
+        });
+      }
+    });
+    void i;
+  });
 
   return (
     <>
@@ -37,48 +59,67 @@ export default async function OpaqueSession({ params }) {
       </div>
 
       <div className="kpis">
-        <div className="kpi"><div className="v">{session.screens.length}</div><div className="l">Screens</div></div>
+        <div className="kpi"><div className="v">{screens.length}</div><div className="l">Screens</div></div>
         <div className="kpi"><div className="v">{mmss(session.duration)}</div><div className="l">Length</div></div>
+        <div className="kpi"><div className="v">{withUrls.length}</div><div className="l">Generations</div></div>
+        <div className="kpi"><div className="v">{fmtUSD(withUrls.reduce((s, g) => s + (g.costUSD || 0), 0))}</div><div className="l">Cost</div></div>
         <div className="kpi"><div className="v">{session.device}</div><div className="l">Device</div></div>
-        <div className="kpi"><div className="v">{session.ios}</div><div className="l">iOS</div></div>
         <div className="kpi"><div className="v">v{session.appVersion}</div><div className="l">App</div></div>
       </div>
 
-      <h2>Trajectory</h2>
+      <h2>The path they took</h2>
       <div className="panel">
-        <div style={{ display: "flex", height: 30, borderRadius: 8, overflow: "hidden", border: "1px solid #232833" }}>
-          {session.screens.map((x, i) => (
-            <div key={i} title={`${x.s} — ${mmss(x.d)}`}
-              style={{ width: `${Math.max((x.d / total) * 100, 1.2)}%`, background: color(x.s),
-                       borderRight: "1px solid rgba(0,0,0,0.35)" }} />
-          ))}
-        </div>
+        <Flow steps={steps.length ? steps : screensToSteps(screens)} />
       </div>
 
-      <h2>Every screen, in order</h2>
-      <div className="panel flush">
-        <table>
-          <thead>
-            <tr><th>#</th><th>Screen</th><th>Opened at</th><th>Stayed</th><th>Share</th></tr>
-          </thead>
-          <tbody>
-            {session.screens.map((x, i) => (
-              <tr key={i}>
-                <td className="mono muted">{i + 1}</td>
-                <td>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ width: 9, height: 9, borderRadius: 2, background: color(x.s) }} />
-                    {x.s}
-                  </span>
-                </td>
-                <td className="mono muted">{x.at == null ? "—" : `+${mmss(x.at)}`}</td>
-                <td className="mono">{mmss(x.d || 0)}</td>
-                <td className="mono muted">{(((x.d || 0) / total) * 100).toFixed(0)}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <h2>What they made</h2>
+      {withUrls.length === 0 ? (
+        <div className="panel empty">No generations in this session.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {withUrls.map((g, i) => (
+            <div className="panel" key={i}>
+              <div style={{ display: "flex", gap: 18, alignItems: "flex-start", flexWrap: "wrap" }}>
+                {g.beforeUrl || g.afterUrl ? (
+                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    {["before", "after"].map((side) => {
+                      const url = side === "before" ? g.beforeUrl : g.afterUrl;
+                      return (
+                        <figure key={side} style={{ margin: 0 }}>
+                          {url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={url} alt={side} style={{ width: 130, borderRadius: 10, display: "block", border: "1px solid #232833" }} />
+                          ) : (
+                            <div style={{ width: 130, height: 130, borderRadius: 10, background: "#12151b",
+                                          border: "1px solid #232833", display: "grid", placeItems: "center" }}
+                                 className="mono muted">—</div>
+                          )}
+                          <figcaption className="mono muted" style={{ fontSize: 11, marginTop: 5 }}>{side}</figcaption>
+                        </figure>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="mono muted" style={{ maxWidth: 320, lineHeight: 1.6 }}>
+                    No images for this one — it predates the app version that archives
+                    the before and after. Cost and filter were always recorded.
+                  </div>
+                )}
+
+                <div style={{ flex: "1 1 240px", minWidth: 200 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600 }}>
+                    {g.filterId || g.kind}{g.variationId ? ` · ${g.variationId}` : ""}
+                  </div>
+                  <div className="mono muted" style={{ marginTop: 6, lineHeight: 1.7 }}>
+                    {g.engine} · {g.seconds ?? "?"}s · {fmtUSD(g.costUSD)}
+                    {g.failed && <><br /><span className="bad">failed — {g.error || "unknown"}</span></>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }
